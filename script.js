@@ -15,14 +15,75 @@
   }
 })();
 
-// フェードインアニメーション
+// note RSS 自動取得（rss2json.com経由でCORSを回避）
 (function () {
-  const els = document.querySelectorAll('.note-card, .profile-grid, .notify-box');
-  els.forEach(el => el.classList.add('fade-up'));
-  const obs = new IntersectionObserver((entries) => {
-    entries.forEach((e, i) => { if (e.isIntersecting) { setTimeout(() => e.target.classList.add('is-visible'), i * 80); obs.unobserve(e.target); } });
+  const RSS_URL = 'https://note.com/ssmnakade/rss';
+  const API_URL = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(RSS_URL) + '&count=3';
+  const container = document.getElementById('noteCards');
+  const loading = document.getElementById('noteLoading');
+  const allCard = document.getElementById('noteCardAll');
+
+  if (!container) return;
+
+  function formatDate(dateStr) {
+    try {
+      const d = new Date(dateStr);
+      return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  fetch(API_URL)
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      if (loading) loading.remove();
+      if (!data.items || data.items.length === 0) return;
+
+      data.items.forEach(function (item, i) {
+        const card = document.createElement('a');
+        card.href = item.link;
+        card.target = '_blank';
+        card.rel = 'noopener noreferrer';
+        card.className = 'note-card';
+        card.innerHTML =
+          '<div class="note-card-body">' +
+            '<p class="note-card-label">' + (i === 0 ? '最新記事' : '記事') + '</p>' +
+            '<h3>' + item.title + '</h3>' +
+            '<p class="note-card-meta">中出進 · ' + formatDate(item.pubDate) + '</p>' +
+          '</div>' +
+          '<div class="note-card-arrow" aria-hidden="true">→</div>';
+        container.insertBefore(card, allCard);
+      });
+
+      const newCards = container.querySelectorAll('.note-card:not(.note-card--all)');
+      newCards.forEach(function (el) { el.classList.add('fade-up'); });
+      applyFadeIn(newCards);
+    })
+    .catch(function () {
+      if (loading) {
+        loading.innerHTML = '<p><a href="https://note.com/ssmnakade" target="_blank" rel="noopener noreferrer">noteで最新記事を読む →</a></p>';
+      }
+    });
+})();
+
+// フェードインアニメーション
+function applyFadeIn(els) {
+  const obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e, i) {
+      if (e.isIntersecting) {
+        setTimeout(function () { e.target.classList.add('is-visible'); }, i * 80);
+        obs.unobserve(e.target);
+      }
+    });
   }, { threshold: 0.1 });
-  els.forEach(el => obs.observe(el));
+  els.forEach(function (el) { obs.observe(el); });
+}
+
+(function () {
+  const els = document.querySelectorAll('.profile-grid, .notify-box');
+  els.forEach(function (el) { el.classList.add('fade-up'); });
+  applyFadeIn(els);
 })();
 
 // 登録フォーム（デモ）
