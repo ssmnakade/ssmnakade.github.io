@@ -206,28 +206,6 @@ img, svg { display: block; max-width: 100%; }
 }
 .note-card:hover .note-card-arrow { transform: translateX(4px); }
 
-/* --- Mission Section --- */
-.mission { background: var(--color-bg); }
-.mission-body {
-  max-width: 680px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-  border-left: 3px solid var(--color-accent);
-  padding-left: var(--space-8);
-}
-.mission-body p {
-  font-size: var(--text-base);
-  color: var(--color-text-muted);
-  line-height: 1.85;
-}
-.mission-body p:first-child {
-  font-family: var(--font-display);
-  font-size: var(--text-lg);
-  font-weight: 600;
-  color: var(--color-primary);
-}
-
 /* --- Profile Section --- */
 .profile-grid {
   display: flex; gap: var(--space-10); align-items: flex-start;
